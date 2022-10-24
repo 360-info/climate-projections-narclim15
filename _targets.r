@@ -8,7 +8,6 @@ source("R/03-countdays.r")
 
 tar_option_set(packages = c("dplyr", "stringr", "tibble", "tidyr",
   "ClimateOperators"))
-options(timeout = 3600) # 60 mins per download max
 
 # add collection ids from climatedata-beta.environment.nsw.gov.au here to
 # process other data (eg. minimum temperatures)

@@ -8,6 +8,10 @@
   - `brew install cdo`
 - [R](https://r-project.org)
 
+### ⚠️ Making sure R can find `cdo`
+
+If you get errors like `cdo: command not found` even though you've installed it, you may need to add `cdo` to R's executable `PATH`. (R doesn't use your login shell's path, so you may still be able to run `cdo` in a separate terminal.) You can set this option by uncommenting the line in [`.Rprofile`](./.Rprofile).
+
 
 ### To set an external folder
 
