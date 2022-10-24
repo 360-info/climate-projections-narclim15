@@ -1,3 +1,4 @@
 _targets.yaml
 _targets/
 .DS_Store
+.Rprofile
