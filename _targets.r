@@ -1,13 +1,12 @@
 library(targets)
-# library(tarchetypes)
 
 source("R/00-util.r")
 source("R/01-download.r")
 source("R/02-unzip.r")
 source("R/03-countdays.r")
 
-tar_option_set(packages = c("dplyr", "stringr", "tibble", "tidyr",
-  "ClimateOperators"))
+tar_option_set(packages = c(
+  "dplyr", "stringr", "tibble", "tidyr", "ClimateOperators"))
 
 # add collection ids from climatedata-beta.environment.nsw.gov.au here to
 # process other data (eg. minimum temperatures)
@@ -34,21 +33,19 @@ list(
     format = "file"),
 
   # 2) unzip the netcdfs
+  # (force the output paths to be aggregated so we can analyse them individually)
   tar_target(unzip_data,
     extract_collection(dl_data),
     pattern = map(dl_data),
     format = "file"),
-  # tar_target(narclim_ncdf_metadata, extract_path_metadata(unzip_data)),
+  tar_target(unzip_data_all, unzip_data),
 
   # 3) calculate days >= 35 or 37.5 C
-
   tar_target(count_days,
-    count_annual_days_gte(unzip_data, thresh = thresholds),
-    pattern = cross(unzip_data, thresholds))
+    count_annual_days_gte(unzip_data_all, thresholds),
+    pattern = cross(unzip_data_all, thresholds),
+    format = "file"),
+  tar_target(counted_metadata, extract_counted_metadata(count_days))
 
   # 4) group by model + scenario + years;
 )
-
-
-# "var", "grid", "gcm", "scenario", "run", "rcm", "version",
-#         "time", "years", "ext"
