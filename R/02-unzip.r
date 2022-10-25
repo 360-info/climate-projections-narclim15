@@ -1,4 +1,4 @@
-unzipped_folder <- create_storedir_if_missing("unzipped")
+unzipped_folder <- create_storedir_if_missing("02-unzipped")
 
 # extract_collection: unzip the given the zip files full of netcdf files.
 # return the wextracted paths

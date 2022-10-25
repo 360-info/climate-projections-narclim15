@@ -1,4 +1,4 @@
-dl_folder <- create_storedir_if_missing("downloaded")
+dl_folder <- create_storedir_if_missing("01-downloaded")
 
 download_collection <- function(collection_id, collection_name) {
   url_root <-
