@@ -44,7 +44,8 @@ extract_counted_metadata <- function(paths, periods) {
       yr_start_bin = cut(yr_start, breaks = periods,
         labels = head(names(periods), -1)),
       yr_end_bin = cut(yr_end, breaks = periods,
-        labels = head(names(periods), -1)))
+        labels = head(names(periods), -1))) |>
+    filter(yr_start_bin != "-", yr_end_bin != "-")
 }
 
 count_year_overlaps <- function(df) {

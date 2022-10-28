@@ -5,6 +5,7 @@ source("R/00-util.r")
 source("R/01-download.r")
 source("R/02-unzip.r")
 source("R/03-countdays.r")
+source("R/04-periodstats.r")
 
 tar_option_set(packages = c(
   "dplyr", "lubridate", "stringr", "tibble", "tidyr", "ClimateOperators"))
@@ -20,16 +21,19 @@ collections <- c(
 selected_thresholds <- c(35, 37.5)
 
 # note: cut.Date() by default does intervals of [left, right)
+# (use "-" to drop periods)
 year_breaks <- as.Date(c(
   # historical
   `1995` = "1986-01-01",
-  `2015` = "2006-01-01",
+  `-`    = "2006-01-01",
   # rcps
   `2030` = "2021-01-01",
   `2050` = "2041-01-01",
   `2070` = "2061-01-01",
   `2090` = "2081-01-01",
-  `2110` = "2101-01-01"))
+  `-`    = "2101-01-01"))
+
+yearblock_stats <- c("mean", "max", "min")
 
 # here's the pipeline to run:
 list(
@@ -38,7 +42,8 @@ list(
   tar_target(collection_ids, collections),
   tar_target(collection_names, names(collections)),
   tar_target(thresholds, selected_thresholds),
-  tar_target(periods, year_breaks),
+  tar_target(year_cuts, year_breaks),
+  tar_target(period_stats, yearblock_stats),
 
   # 1) download the zip files
   tar_target(dl_data,
@@ -47,7 +52,7 @@ list(
     format = "file"),
 
   # 2) unzip the netcdfs
-  # (force the output paths to be aggregated so we can analyse them individually)
+  # (force output paths aggregation so we can analyse them individually)
   tar_target(unzip_data,
     extract_collection(dl_data),
     pattern = map(dl_data),
@@ -60,14 +65,17 @@ list(
     pattern = cross(unzip_data_all, thresholds),
     format = "file"),
   tar_group_by(counted_metadata,
-    extract_counted_metadata(count_days, periods),
-    thresh, var, grid, gcm, scenario, run, rcm, year_start_bin),
-  tar_target(year_overlap_ok, tar_assert_identical(
-    count_year_overlaps(counted_metadata), 0L,
-    "Some of the year_breaks overlap file boundaries."))
+    extract_counted_metadata(count_days, year_cuts),
+    thresh, var, grid, gcm, scenario, run, rcm, yr_start_bin),
+  tar_target(year_overlap_ok,
+    tar_assert_identical(
+      count_year_overlaps(counted_metadata), 0L,
+      "Some of the year_breaks overlap file boundaries.")),
 
-  # 4) count year block stats (typical/hot/cold)
-  tar_target(
+  # 4) count year block stats (mean/min/max)
+  tar_target(calc_periodstat,
+    calc_period_stats(counted_metadata, period_stats),
+    pattern = cross(counted_metadata, period_stats),
+    format = "file")
 
-  )
 )
