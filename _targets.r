@@ -8,7 +8,10 @@ source("R/03-countdays.r")
 source("R/04-periodstats.r")
 
 tar_option_set(packages = c(
-  "dplyr", "lubridate", "stringr", "tibble", "tidyr", "ClimateOperators"))
+  "dplyr", "lubridate", "purrr", "stringr", "tibble", "tidyr",
+    "ClimateOperators"))
+
+# pipeline inputs: configure these! -------------------------------------------
 
 # add collection ids from climatedata-beta.environment.nsw.gov.au here to
 # process other data (eg. minimum temperatures)
@@ -35,10 +38,11 @@ year_breaks <- as.Date(c(
 
 yearblock_stats <- c("mean", "max", "min")
 
-# here's the pipeline to run:
+# pipeline: use targets::tar_make() to run it ---------------------------------
+
 list(
 
-  # 0) define the inputs
+  # 0) bring the configured inputs into the pipeline
   tar_target(collection_ids, collections),
   tar_target(collection_names, names(collections)),
   tar_target(thresholds, selected_thresholds),
@@ -54,7 +58,10 @@ list(
   # 2) unzip the netcdfs
   # (force output paths aggregation so we can analyse them individually)
   tar_target(unzip_data,
-    extract_collection(dl_data),
+    # NOTE - remove or change the `unzip` argument if you'd prefer to use R's
+    # default implementation (it only partially extracts for me though!).
+    # getOption("unzip") may not work on windows!
+    extract_collection(dl_data, unzip = getOption("unzip")),
     pattern = map(dl_data),
     format = "file"),
   tar_target(unzip_data_all, unzip_data),
