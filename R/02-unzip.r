@@ -12,9 +12,6 @@ extract_collection <- function(zip_path, unzip = "internal") {
       unzipped_folder,
       unzip(zip_path, exdir = unzipped_folder, list = TRUE, unzip = unzip)$Name)
 
-  print("Debug file paths:")
-  print(extracted_paths[1:5])
-
   # extract and return the (full) paths
   unzip(zip_path, exdir = unzipped_folder, unzip = unzip)
   return(extracted_paths)

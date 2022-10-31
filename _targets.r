@@ -6,6 +6,7 @@ source("R/01-download.r")
 source("R/02-unzip.r")
 source("R/03-countdays.r")
 source("R/04-periodstats.r")
+source("R/05-ensemblestats.r")
 
 tar_option_set(packages = c(
   "dplyr", "lubridate", "purrr", "stringr", "tibble", "tidyr",
@@ -37,6 +38,7 @@ year_breaks <- as.Date(c(
   `-`    = "2101-01-01"))
 
 yearblock_stats <- c("mean", "max", "min")
+model_ensemble_stats <- c("mean", "max", "min")
 
 # pipeline: use targets::tar_make() to run it ---------------------------------
 
@@ -48,6 +50,7 @@ list(
   tar_target(thresholds, selected_thresholds),
   tar_target(year_cuts, year_breaks),
   tar_target(period_stats, yearblock_stats),
+  tar_target(ensemble_stats, model_ensemble_stats),
 
   # 1) download the zip files
   tar_target(dl_data,
@@ -80,18 +83,19 @@ list(
     tar_assert_identical(
       count_year_overlaps(counted_metadata), 0L,
       "Some of the year_breaks overlap file boundaries.")),
-  tar_target(calc_periodstat,
+  tar_target(calc_period_stat,
     calc_period_stats(counted_metadata, period_stats),
     pattern = cross(counted_metadata, period_stats),
     format = "file"),
 
   # 5) ensemble statistics (group gcms/runs/rcms together)
   tar_group_by(yearblock_metadata,
-    extract_yearblockstats_metadata(calc_periodstat),
-    # group_by:
-    thresh, var, grid, scenario, yearstat, period
-
-
-  )
+    extract_yearblockstats_metadata(calc_period_stat),
+    thresh, var, grid, scenario, yearstat, period),
+  # TODO - any checks to make?
+  tar_target(calc_ensemble_stat,
+    calc_ensemble_stats(yearblock_metadata, ensemble_stats),
+    pattern = cross(yearblock_metadata, ensemble_stats),
+    format = "file")
 
 )
