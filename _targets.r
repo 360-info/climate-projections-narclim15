@@ -66,11 +66,13 @@ list(
     format = "file"),
   tar_target(unzip_data_all, unzip_data),
 
-  # 3) calculate days >= 35 or 37.5 C (group files for year_block stats)
+  # 3) calculate days >= 35 or 37.5 C (group each year)
   tar_target(count_days,
     count_annual_days_gte(unzip_data_all, thresholds),
     pattern = cross(unzip_data_all, thresholds),
     format = "file"),
+
+  # 4) count year block stats (mean/min/max)
   tar_group_by(counted_metadata,
     extract_counted_metadata(count_days, year_cuts),
     thresh, var, grid, gcm, scenario, run, rcm, yr_start_bin),
@@ -78,11 +80,18 @@ list(
     tar_assert_identical(
       count_year_overlaps(counted_metadata), 0L,
       "Some of the year_breaks overlap file boundaries.")),
-
-  # 4) count year block stats (mean/min/max)
   tar_target(calc_periodstat,
     calc_period_stats(counted_metadata, period_stats),
     pattern = cross(counted_metadata, period_stats),
-    format = "file")
+    format = "file"),
+
+  # 5) ensemble statistics (group gcms/runs/rcms together)
+  tar_group_by(yearblock_metadata,
+    extract_yearblockstats_metadata(calc_periodstat),
+    # group_by:
+    thresh, var, grid, scenario, yearstat, period
+
+
+  )
 
 )
