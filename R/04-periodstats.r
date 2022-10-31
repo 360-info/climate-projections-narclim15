@@ -35,12 +35,17 @@ calc_period_stats <- function(df, period_stat = c("mean", "min", "max")) {
   in_file <- basename(df$path[1])
   year_block <- df$yr_start_bin[1]
 
-  # output: replace individual years with year block
+  # output: replace individual years with year stat + block
+  in_file |>
+    str_split("[_.]") |>
+    unlist() |>
+    base::`[`(1:9) ->
+  out_pattern
+
   out_file <-
-    in_file |>
-    str_replace(
-      "_[:digit:]{8}\\-[:digit:]{8}",
-      paste0("_", period_operator, "_", year_block))
+    paste0(
+      paste0(out_pattern, collapse = "_"),
+      "_", period_operator, "_", year_block, ".nc")
 
   out_path <- file.path(periodstat_folder, out_file)
 
@@ -50,7 +55,7 @@ calc_period_stats <- function(df, period_stat = c("mean", "min", "max")) {
   cdo(
     "-L",
     period_operator,
-    "-mergetime", paste(df$path, collapse = " "),
+    "-mergetime", df$path,
     out_path)
 
   return(out_path)
