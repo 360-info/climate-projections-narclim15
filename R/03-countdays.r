@@ -11,19 +11,17 @@ count_annual_days_gte <- function(path, thresh = 35) {
     "gte",
     str_replace(thresh, fixed("."), "p"), "_",
     basename(path))
-
   out_path <- file.path(counted_folder, out_file)
 
   # run cdo:
   # - mark days as 1 if >= threshold (convert °C to K)
   # - count all such days each year
   cdo(
-    ssl(
-      "-L",
-      "yearsum",
-      csl("-gec", thresh + 273.15),
-      path,
-      out_path))
+    "-L",
+    "yearsum",
+    csl("-gec", thresh + 273.15),
+    path,
+    out_path)
 
   return(out_path)
 }

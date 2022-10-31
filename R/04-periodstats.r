@@ -5,7 +5,7 @@ periodstat_folder <- create_storedir_if_missing("04-periodstats")
 # files and calculate the min, max or mean across time
 calc_period_stats <- function(df, period_stat = c("mean", "min", "max")) {
 
-  period_operator <- paste0("year", period_stat)
+  period_operator <- paste0("tim", period_stat)
   in_file <- basename(df$path[1])
   year_block <- df$yr_start_bin[1]
 
@@ -21,13 +21,6 @@ calc_period_stats <- function(df, period_stat = c("mean", "min", "max")) {
   # run cdo:
   # - concatenate all the files in the year block group
   # - extract the min/max/mean across years
-  print(paste(
-    "cdo", "-L",
-      period_operator,
-      "-mergetime", paste(df$path, collapse = " "),
-      out_path
-  ))
-
   cdo(
     "-L",
     period_operator,
