@@ -38,7 +38,7 @@ calc_ensemble_stats <- function(df, ensemble_stat = c("mean", "min", "max")) {
   # - extract the ensemble min/max/mean
   
   cdo(
-    "-L",
+    "-L", "-O",
     ensemble_operator, df$path,
     out_path)
 

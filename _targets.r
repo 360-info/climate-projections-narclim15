@@ -7,6 +7,7 @@ source("R/02-unzip.r")
 source("R/03-countdays.r")
 source("R/04-periodstats.r")
 source("R/05-ensemblestats.r")
+source("R/06-histdiff.r")
 
 tar_option_set(packages = c(
   "dplyr", "lubridate", "purrr", "stringr", "tibble", "tidyr",
@@ -96,6 +97,21 @@ list(
   tar_target(calc_ensemble_stat,
     calc_ensemble_stats(yearblock_metadata, ensemble_stats),
     pattern = cross(yearblock_metadata, ensemble_stats),
+    format = "file"),
+
+  # 6) calc rcp deltas (group scenario/period together, hist first)
+  tar_target(ensemble_metadata,
+    extract_ensemblestats_metadata(calc_ensemble_stat)),
+  tar_target(calc_rcp_delta,
+    calc_rcp_deltas(ensemble_metadata),
+    pattern = map(ensemble_metadata),
     format = "file")
 
+  # 7) calculate area averages (for postcodes, sa4s, etc.)
+  # tar_target(calc_field_avg,
+  #   calc_field_avgs()
+  # )
+
 )
+
+
