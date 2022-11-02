@@ -38,7 +38,7 @@ download_boundaries <- function(service_code, query_options) {
   # push the geojson boundaries into sf
   api_request |>
     resp_body_string() |>
-    st_read(quiet = TRUE) ->
+    st_read(quiet = TRUE, drivers = "GeoJSON") ->
   boundaries
 
   # check for empty feature sets
@@ -47,4 +47,13 @@ download_boundaries <- function(service_code, query_options) {
   }
 
   return(boundaries)
+}
+
+# calc_field_avgs: given a netcdf path and an sf of area boundaries,
+# calculate the field (area) average for each feature
+calc_field_avgs <- function(nc_path, boundaries) {
+
+  # load the ncetdf
+  st_read(nc_path)
+
 }
