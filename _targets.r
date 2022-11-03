@@ -16,7 +16,7 @@ tar_option_set(packages = c(
 # pipeline inputs: configure these! -------------------------------------------
 
 # choose where to get narclim data from (comment out unwanted sources):
-# - dpie: the `collection` ids below will be downloaded from the 
+# - dpie: the `collection` ids below will be downloaded from the
 #     dpie website and unzipped
 # - nci: folders will be downloaded based on the combinations of options
 #     defined below in `nci_paths`
@@ -29,7 +29,7 @@ collections <- ifelse("dpie" %in% data_sources,
     tasmax_hist = "a53ecb71-8896-4002-8499-96755c668845",
     tasmax_rcp45 = "ae2c99ac-5ef1-44ef-abf9-10d63082f739",
     tasmax_rcp85 = "654c47a4-f9bb-4941-97da-913f76c0ef2e"),
-  character(0))
+  FALSE)
 
 # ... or, download folders from nci:
 nci_host <- "gadi"
@@ -47,13 +47,13 @@ nci_folders <- ifelse("nci" %in% data_sources,
     var = "tasmax-bc",
     stringsAsFactors = FALSE) |>
   apply(1, paste, collapse = "/"),
-  character(0))
+  FALSE)
 
 # add folder paths here if you'd prefer to process netcdf files you've
 # downloaded or created yourself
 manual_folders <- ifelse("manual" %in% data_sources,
   c("data"),
-  character(0))
+  FALSE)
 
 # temperature thresholds
 selected_thresholds <- c(35, 37.5)
@@ -113,8 +113,7 @@ list(
     format = "file"),
   # 1c) manual paths
   tar_target(manual_src_files,
-    list.files(manual_paths, pattern = glob2rx("*.nc"), full.names = TRUE,
-      recursive = TRUE),
+    list_path(manual_paths),
     pattern = map(manual_paths),
     format = "file"),
 
