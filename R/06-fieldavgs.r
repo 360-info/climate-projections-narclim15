@@ -1,5 +1,5 @@
 # create the destination folder if it's missing
-boundaries_folder <- create_storedir_if_missing("07a-boundaries")
+boundaries_folder <- create_storedir_if_missing("06-fieldavgs")
 
 # download_boundaries: download and save boundaries (as geoJSON) in sf,
 # using service codes from https://geo.abs.gov.au/arcgis/rest/services

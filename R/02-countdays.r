@@ -1,5 +1,5 @@
 # create the destination folder if it's missing
-counted_folder <- create_storedir_if_missing("03-counted")
+counted_folder <- create_storedir_if_missing("02-counted")
 
 # count_annual_days_gte: given a netcdf path, a threshold (in °C) and a variable name
 # in the netcdf, return the path to a netcdf with the annual number of days

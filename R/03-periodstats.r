@@ -1,5 +1,5 @@
 # create the destination folder if it's missing
-periodstat_folder <- create_storedir_if_missing("04-periodstats")
+periodstat_folder <- create_storedir_if_missing("03-periodstats")
 
 # extract_path_metadata: extract the encoded netcdf metadata in narclim
 # source filenames as a tibble. group start and end dates into year periods

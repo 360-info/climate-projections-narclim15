@@ -1,5 +1,5 @@
 # create the destination folder if it's missing
-histdiff_folder <- create_storedir_if_missing("06-histdiff")
+histdiff_folder <- create_storedir_if_missing("05-histdiff")
 
 # extract_ensemblestats_metadata: extract the encoded netcdf metadata in
 # narclim source filenames as a tibble. tibble filters historical files out,

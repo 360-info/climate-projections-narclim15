@@ -1,5 +1,5 @@
 # create the destination folder if it's missing
-ensemblestat_folder <- create_storedir_if_missing("05-ensemblestats")
+ensemblestat_folder <- create_storedir_if_missing("04-ensemblestats")
 
 # extract_yearblockstats_metadata: extract the encoded netcdf metadata in
 # narclim source filenames as a tibble. group start and end dates into year
