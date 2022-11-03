@@ -53,7 +53,35 @@ download_boundaries <- function(service_code, query_options) {
 # calculate the field (area) average for each feature
 calc_field_avgs <- function(nc_path, boundaries) {
 
-  # load the ncetdf
-  st_read(nc_path)
+  # identify the netcdf var name from the path
+  nc_path |>
+    basename() |>
+    str_split("[_.]") |>
+    unlist() |>
+    base::`[`(2) ->
+  nc_var_name
 
+  # identify the unique code for each feature: likely whichever of
+  # [geography]_CODE_[year] that has the most unique values
+  test_boundaries |>
+    st_drop_geometry() |>
+    as_tibble() |>
+    dplyr::select(matches("*_CODE_*")) |>
+    summarise(across(everything(), ~ length(unique(.x)))) |>
+    pivot_longer(cols = everything()) |>
+    filter(value == max(value, na.rm = TRUE)) |>
+    pull(name) ->
+  id_code_col
+
+  # load the ncetdf with raster and ncdf4
+  nc_stack <- stack(nc_path, varname = nc_var_name)
+
+  # calc and return the field averages (without the geometry)
+  # (NOTE - use * 1 to force the netcdf into memory
+  #  see: https://github.com/isciences/exactextractr/issues/21)
+  boundaries |>
+    mutate(value = exact_extract(nc_stack * 1, boundaries, "mean")) |>
+    st_drop_geometry() |>
+    dplyr::select(OBJECTID, all_of(id_code_col), value) |>
+    as_tibble()
 }

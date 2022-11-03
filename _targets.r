@@ -11,8 +11,8 @@ source("R/06-histdiff.r")
 source("R/07-fieldavgs.r")
 
 tar_option_set(packages = c(
-  "dplyr", "httr2", "jsonlite", "lubridate", "purrr", "sf", "stringr",
-  "tibble", "tidyr", "ClimateOperators"))
+  "dplyr", "exactextractr", "httr2", "jsonlite", "lubridate", "ncdf4", "purrr",
+    "raster", "sf", "stringr", "tibble", "tidyr", "ClimateOperators"))
 
 # pipeline inputs: configure these! -------------------------------------------
 
@@ -49,13 +49,8 @@ model_ensemble_stats <- c("mean", "max", "min")
 #   (ref: https://geo.abs.gov.au/arcgis/sdk/rest/index.html#/
 #     Query_Map_Service_Layer/02ss0000000r000000)
 boundaries <- c(
-  `ASGS2021/SAL` =
-    # '{"geometry": "110,-45,155,-10", "geometryType": "esriGeometryEnvelope" }',
-    '{"where": "OBJECTID > 0"}',
-  `ASGS2021/POA` =
-    # '{"geometry": "110,-45,155,-10", "geometryType": "esriGeometryEnvelope" }'
-    '{"where": "OBJECTID > 0"}'
-    )
+  `ASGS2021/SAL` = '{"where": "OBJECTID > 0"}',
+  `ASGS2021/POA` = '{"where": "OBJECTID > 0"}')
 
 # pipeline: use targets::tar_make() to run it ---------------------------------
 
@@ -131,10 +126,11 @@ list(
   tar_target(boundary_shapes,
     download_boundaries(boundary_service_codes, boundary_query_opts),
     pattern = map(boundary_service_codes, boundary_query_opts),
-    iteration = "list")# ,
-  # tar_target(calc_field_avg,
-  #   calc_field_avgs(stats_and_deltas, boundary_shapes),
-  #   pattern = cross(stats_and_deltas, boundary_shapes)
-  # )
+    iteration = "list"),
+  tar_target(calc_field_avg,
+    calc_field_avgs(stats_and_deltas, boundary_shapes),
+    pattern = cross(stats_and_deltas, boundary_shapes))
+
+  # 8) cleanup and consolidation?
 
 )
