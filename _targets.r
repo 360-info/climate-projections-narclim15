@@ -29,7 +29,7 @@ collections <- ifelse("dpie" %in% data_sources,
     tasmax_hist = "a53ecb71-8896-4002-8499-96755c668845",
     tasmax_rcp45 = "ae2c99ac-5ef1-44ef-abf9-10d63082f739",
     tasmax_rcp85 = "654c47a4-f9bb-4941-97da-913f76c0ef2e"),
-  FALSE)
+  c(x = FALSE))
 
 # ... or, download folders from nci:
 nci_host <- "gadi"
