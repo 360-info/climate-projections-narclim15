@@ -15,17 +15,6 @@ The pipeline currently analyses bias-corrected daily maximum temperatures (`tasm
   - macOS: `brew install libssh`
   - `libssh-dev` on Debian/Ubuntu, `libssh-devl` on Fedora
 
-
-## 🌟 Running the pipeline
-
-Once you're set up and have [changed any options](#configuration), running the pipeline is as as simple as running `./run.sh` or `./run.R`, which will call `targets::tar_make()`.
-
-The pipeline will store intermediate results in the targets store folder, which by default is `_targets/` in the project folder. (You can [change this](#configuration) if you'd like.)
-
-Final results are saved to the `data` folder.
-
-You can run the pipeline again - say, adding new collections or temperature thresholds to `_targets.r` - and `{targets}` will just run the results that need updating.
-
 ## 🎛 Configuration
 
 You can configure a few prerequisite options by checking the [`.Rprofile`](./.Rprofile). Options include:
@@ -36,9 +25,36 @@ You can configure a few prerequisite options by checking the [`.Rprofile`](./.Rp
   - You can also move an existing `_targets/` folder and update this option if you run out of space part way through the analysis.
   - Setting this option creates a `_targets.yaml` in the project folder.
 
-You can further configure how the pipeline runs by altering the top half of `-Targets.r`, marked by the comment `pipeline inputs`. These options include:
+You can further configure how the pipeline runs by altering the top half of `_targets.r`, marked by the comment `pipeline inputs`. These options include:
 
-* Which source datasets to download from NSW DPIE (using the collection IDs)
+1. `data_sources`: where to get data from. Options include one or more of:
+
+  - `dpie` to download collections from the [DPIE climate data portal](https://climatedata-beta.environment.nsw.gov.au) by their collection ID. Provide collection IDs using the `collections` option.
+  - `nci` to download folders of files from NCI. In this case, `nci_host` is the name of either a remote host (eg. `user@gadi.nci.org.au`) or the name of a host block that matches [your SSH configuration]() (see below), and `nci_folders` lets you generate folders on NCI to download from based on the parameters you're interested in.
+  - `manual` lets you manually provide files (if, for example, you've already downloaded some). In this case, `manual_folders` is a vector of paths to search. The files should still be named using the NARCliM DRS naming scheme:
+    * `[var]_[grid]_[gcm]_[scenario]_[run]_[rcm]_v1_day_[startdate]-[enddate].nc`
+    
+2. `selected_thresholds`: a vector of temperature exceedance thresholds (in °C). The pipeline will count the number of days annually at or above each threshold.
+3. `year_breaks`: a vector of dates used to split the days up. Values here are the dates themselves (given as YYYY-MM-DD strings); names are the labels to give to each period. Periods run forward from the date provided to the day before the next break: for example, if `1995` is `"1986-01-01"` and `-` is `"2006-01-01"`, files between 1986 and 2005 are given the period name `1995`. Use the name `-` to drop files in this period.
+4. `yearblock_stats`: a vector of statistics to calculate over the period (for example, `"mean"` is the number of days ≥ X°C in an average year in the block, while `"max"` is the largest number of such days).
+5. `model_ensemble_stats`: a vector of statistics to calculate across the different climate models (GCMs, RCMs and runs).
+6. `boundaries`: `TODO - redescribe when switching to `{absmapsdata}`
+
+### 🔐 Downloading data from NCI 
+
+If you choose to have the pipeline automatically download data from NCI, you may wish to configure SSH externally using `~/.ssh/config`. This will allow you to use an SSH key, so that you aren't required to provide a password for each folder you download.
+
+The host block in your configuration should be for a remote host that has access to `/g/data`, and the user should have access to the `at43` project, where NARCliM results are stored.
+
+## 🌟 Running the pipeline
+
+Once you're set up and have [changed any options](#configuration), running the pipeline is as as simple as running `./run.sh` or `./run.R`, which will call `targets::tar_make()`.
+
+The pipeline will store intermediate results in the targets store folder, which by default is `_targets/` in the project folder. (You can [change this](#configuration) if you'd like.)
+
+Final results are saved to the `data` folder.
+
+You can run the pipeline again - say, adding new collections or temperature thresholds to `_targets.r` - and `{targets}` will just run the results that need updating.
 
 ## 🛠 Modifying and inspecting the pipeline
 
