@@ -110,13 +110,13 @@ list(
   tar_target(transferred_src_files,
     transfer_folder(nci_paths, nci_host_string),
     pattern = map(nci_paths),
-    format = "file")
+    format = "file"),
   # 1c) manual paths
   tar_target(manual_src_files,
     list.files(manual_paths, pattern = glob2rx("*.nc"), full.names = TRUE,
       recursive = TRUE),
     pattern = map(manual_paths),
-    format = "file")
+    format = "file"),
 
   # 1d) unite all data sources
   tar_target(source_data_all, c(
