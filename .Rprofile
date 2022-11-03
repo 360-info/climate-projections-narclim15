@@ -1,5 +1,5 @@
 # uncomment and edit this line if you need to tell r where to find cdo
-# Sys.setenv(PATH = paste("/example/bin/path", Sys.getenv("PATH"), sep = ":"))
+Sys.setenv(PATH = paste(Sys.getenv("PATH"), "/opt/homebrew/bin", sep = ":"))
 
 # 60 mins per download max
 options(timeout = 3600)
@@ -10,7 +10,7 @@ options(timeout = 3600)
 
 # pipeline inputs: configure these! -------------------------------------------
 
-# choose where to get narclim data from (comment out unwanted sources):
+# choose one or more sources to get narclim data from:
 # - dpie: the `collection` ids below will be downloaded from the
 #     dpie website and unzipped
 # - nci: folders will be downloaded based on the combinations of options
