@@ -24,36 +24,45 @@ tar_option_set(packages = c(
 data_sources <- c("nci")
 
 # get collections from climatedata-beta.environment.nsw.gov.au based on ids...
-collections <- ifelse("dpie" %in% data_sources,
-  c(
+if ("dpie" %in% data_sources) {
+  collections <- c(
     tasmax_hist = "a53ecb71-8896-4002-8499-96755c668845",
     tasmax_rcp45 = "ae2c99ac-5ef1-44ef-abf9-10d63082f739",
-    tasmax_rcp85 = "654c47a4-f9bb-4941-97da-913f76c0ef2e"),
-  c(x = FALSE))
+    tasmax_rcp85 = "654c47a4-f9bb-4941-97da-913f76c0ef2e")
+} else {
+  collections <- c(x = FALSE)
+}
 
 # ... or, download folders from nci:
 nci_host <- "gadi"
-nci_folders <- ifelse("nci" %in% data_sources,
-  expand.grid(
-    root = "/g/data/at43/output",
-    grid = "AUS-44",
-    unsw = "UNSW",
-    gcm = c("CCCma-CanESM2", "CSIRO-BOM-ACCESS1-0", "CSIRO-BOM-ACCESS1-3"),
-    scenario = c("historical", "rcp45", "rcp85"),
-    run = "r1i1p1",
-    rcm = c("UNSW-WRF360J", "UNSW-WRF360K"),
-    v1 = "v1",
-    time = "day",
-    var = "tasmax-bc",
-    stringsAsFactors = FALSE) |>
-  apply(1, paste, collapse = "/"),
-  FALSE)
+if ("nci" %in% data_sources) {
+  nci_folders <-
+    expand.grid(
+      root = "/g/data/at43/output",
+      grid = "AUS-44",
+      unsw = "UNSW",
+      gcm = c("CCCma-CanESM2", "CSIRO-BOM-ACCESS1-0", "CSIRO-BOM-ACCESS1-3"),
+      scenario = c("historical", "rcp45", "rcp85"),
+      run = "r1i1p1",
+      rcm = c("UNSW-WRF360J", "UNSW-WRF360K"),
+      v1 = "v1",
+      time = "day",
+      var = "tasmax-bc",
+      stringsAsFactors = FALSE) |>
+    apply(1, paste, collapse = "/")
+} else {
+  nci_folders <- FALSE
+}
 
 # add folder paths here if you'd prefer to process netcdf files you've
 # downloaded or created yourself
-manual_folders <- ifelse("manual" %in% data_sources,
-  c("data"),
-  FALSE)
+if ("manual" %in% data_sources) {
+  manual_folders <- c(
+    "srcdata"
+  )
+} else {
+  manual_folders <- FALSE
+}
 
 # temperature thresholds
 selected_thresholds <- c(35, 37.5)
