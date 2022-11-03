@@ -1,7 +1,9 @@
 unzipped_folder <- create_storedir_if_missing("02-unzipped")
 
 # extract_collection: unzip the given the zip files full of netcdf files.
-# return the wextracted paths
+# return the wextracted paths. `unzip` is the unzipping method passed to
+# utils::unzip - on R >= 4.2.2, the default ("internal") is fine, but on
+# earlier versions, you may need getOption("unzip") or another option.
 extract_collection <- function(zip_path, unzip = "internal") {
 
   print(paste("Unzip: ", zip_path))
