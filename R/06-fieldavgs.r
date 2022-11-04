@@ -76,6 +76,10 @@ calc_field_avgs <- function(nc_path, boundaries) {
   # load the ncetdf with raster and ncdf4
   nc_stack <- stack(nc_path, varname = nc_var_name)
 
+  # TODO - set CRS for rotated pole grids
+  # https://gis.stackexchange.com/a/273535/67998
+  
+
   # calc and return the field averages (without the geometry)
   # (NOTE - use * 1 to force the netcdf into memory
   #  see: https://github.com/isciences/exactextractr/issues/21)
