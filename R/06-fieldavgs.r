@@ -63,7 +63,7 @@ calc_field_avgs <- function(nc_path, boundaries) {
 
   # identify the unique code for each feature: likely whichever of
   # [geography]_CODE_[year] that has the most unique values
-  test_boundaries |>
+  boundaries |>
     st_drop_geometry() |>
     as_tibble() |>
     dplyr::select(matches("*_CODE_*")) |>
