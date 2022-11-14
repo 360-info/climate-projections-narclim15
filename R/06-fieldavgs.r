@@ -1,72 +1,26 @@
 # create the destination folder if it's missing
 boundaries_folder <- create_storedir_if_missing("06-fieldavgs")
 
-# download_boundaries: download and save boundaries (as geoJSON) in sf,
-# using service codes from https://geo.abs.gov.au/arcgis/rest/services
-# (eg. "ASGS2021/STE").
-# optionally provide a query_options list of named options that are included,
-# alongside `outFields = "*"`, `f = "geojson"` and `"returnGeometry = "true"`.
-# query_options examples:
-#   mainland australia + tasmania:
-#     list(geometry = "110,-45,155,-10", geometryType = "esriGeometryEnvelope")
-#   specific states (for service_code "ASGS2021/STE"):
-#     list(where = "STATE_NAME_2021 IN ('Victoria', 'Tasmania')")
-# full options: https://geo.abs.gov.au/arcgis/sdk/rest/index.html#/
-#   Query_Map_Service_Layer/02ss0000000r000000/
-download_boundaries <- function(service_code, query_options) {
-
-  # build the query path
-  api_query <- url_parse("https://geo.abs.gov.au")
-  api_root <- "/arcgis/rest/services"
-  layer <- "0"
-  api_query$path <-
-    paste(api_root, service_code, "MapServer", layer, "query", sep = "/")
-
-  # attach query options, plus a few defaults
-  api_query$query                <- fromJSON(query_options)
-  api_query$query$outFields      <- "*"
-  api_query$query$returnGeometry <- "true"
-  api_query$query$f              <- "geojson"
-
-  # request the boundaries
-  api_query |>
-    url_build() |>
-    request() |>
-    req_perform() ->
-  api_request
-
-  # push the geojson boundaries into sf
-  api_request |>
-    resp_body_string() |>
-    st_read(quiet = TRUE, drivers = "GeoJSON") ->
-  boundaries
-
-  # check for empty feature sets
-  if (nrow(boundaries) == 0L) {
-    stop("Empty set of boundaries returned by API.")
-  }
-
-  return(boundaries)
-}
-
 # calc_field_avgs: given a netcdf path and an sf of area boundaries,
 # calculate the field (area) average for each feature
 calc_field_avgs <- function(nc_path, boundaries) {
 
-  # identify the netcdf var name from the path
+  # identify the netcdf var name and grid from the filename
   nc_path |>
     basename() |>
     str_split("[_.]") |>
-    unlist() |>
-    base::`[`(2) ->
-  nc_var_name
+    unlist() ->
+  nc_path_bits
+    
+  nc_var_name <- nc_path_bits[2]
+  nc_grid <- nc_path_bits[3]
 
   # identify the unique code for each feature: likely whichever of
-  # [geography]_CODE_[year] that has the most unique values
+  # the cols ending in 'code' that has the most unique values
   boundaries |>
     st_drop_geometry() |>
     as_tibble() |>
-    dplyr::select(matches("*_CODE_*")) |>
+    dplyr::select(ends_with("code")) |>
     summarise(across(everything(), ~ length(unique(.x)))) |>
     pivot_longer(cols = everything()) |>
     filter(value == max(value, na.rm = TRUE)) |>
@@ -76,16 +30,36 @@ calc_field_avgs <- function(nc_path, boundaries) {
   # load the ncetdf with raster and ncdf4
   nc_stack <- stack(nc_path, varname = nc_var_name)
 
-  # TODO - set CRS for rotated pole grids
-  # https://gis.stackexchange.com/a/273535/67998
-  
+  # read grid in with stars
+  # (rotated grid handled with curvilinear option; regular is wgs84)
+  if (str_ends(nc_grid, "i")) {
+    nc_stars <- read_ncdf(nc_grid, var = nc_var_name,
+      curvilinear = c("lon", "lat"))
+  } else {
+    nc_stars <- read_ncdf(nc_grid, var = nc_var_name)
+  }
 
-  # calc and return the field averages (without the geometry)
-  # (NOTE - use * 1 to force the netcdf into memory
-  #  see: https://github.com/isciences/exactextractr/issues/21)
-  boundaries |>
-    mutate(value = exact_extract(nc_stack * 1, boundaries, "mean")) |>
-    st_drop_geometry() |>
-    dplyr::select(OBJECTID, all_of(id_code_col), value) |>
-    as_tibble()
+  bounds <- boundaries[[1]]
+  sf_use_s2(FALSE)
+  bounds_valid <- st_make_valid(bounds)
+  sf_use_s2(TRUE)
+
+  # convert stars to sf before aggregating over areas
+  # (stars::aggregate leaves a lot of holes for some reason)
+  # nc_stars |>
+  nc_stars |>
+    st_as_sf() |>
+    aggregate(by = st_geometry(bounds_valid), FUN = mean, na.rm = TRUE,
+      as_points = FALSE) |>
+    st_join(bounds_valid, join = st_equals) ->
+  nc_joined
+    
+  # tidy up, drop geometry and return
+  # (note that the units in these grids are no longer kelvin - they're
+  # either °C or dimensionless, for days >= X°C - but we didn't change
+  # the recorded units in the grids along the way)
+  nc_joined |>
+    set_names(c("value", tail(names(nc_joined), -1))) |>
+    mutate(value = as.numeric(value)) |>
+    st_drop_geometry()
 }

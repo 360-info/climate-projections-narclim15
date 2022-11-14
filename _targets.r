@@ -11,7 +11,7 @@ source("R/06-fieldavgs.r")
 
 tar_option_set(packages = c(
   "dplyr", "exactextractr", "httr2", "jsonlite", "lubridate", "ncdf4", "purrr",
-    "raster", "sf", "stringr", "tibble", "tidyr", "ClimateOperators"))
+    "raster", "sf", "strayr", "stringr", "tibble", "tidyr", "ClimateOperators"))
 
 # pipeline inputs: configure these! -------------------------------------------
 
@@ -83,15 +83,9 @@ year_breaks <- as.Date(c(
 yearblock_stats <- c("mean", "max", "min")
 model_ensemble_stats <- c("mean", "max", "min")
 
-# abs boundaries to download and calculate field (area) averages on.
-# names are service codes (eg. "ASGS2021/SAL")
-#   (see: https://geo.abs.gov.au/arcgis/rest/services)
-# values are json strings of options for the arcgis rest api
-#   (ref: https://geo.abs.gov.au/arcgis/sdk/rest/index.html#/
-#     Query_Map_Service_Layer/02ss0000000r000000)
-boundaries <- c(
-  `ASGS2021/SAL` = '{"where": "OBJECTID > 0"}',
-  `ASGS2021/POA` = '{"where": "OBJECTID > 0"}')
+# abs boundaries to download and calculate field (area) averages on
+# https://github.com/wfmackey/absmapsdata
+boundaries <- c("suburb2021", "postcode2021")
 
 # pipeline: use targets::tar_make() to run it ------------------------------
 
@@ -107,8 +101,7 @@ list(
   tar_target(year_cuts, year_breaks),
   tar_target(period_stats, yearblock_stats),
   tar_target(ensemble_stats, model_ensemble_stats),
-  tar_target(boundary_service_codes, names(boundaries)),
-  tar_target(boundary_query_opts, boundaries),
+  tar_target(boundary_codes, boundaries),
 
   # 1a) download and unzip the collections from dpie
   tar_target(downloaded_src_files,
@@ -173,8 +166,9 @@ list(
   # (do this for both regular ensemble stats and rcp deltas!)
   tar_target(stats_and_deltas, c(calc_ensemble_stat, calc_rcp_delta)),
   tar_target(boundary_shapes,
-    download_boundaries(boundary_service_codes, boundary_query_opts),
-    pattern = map(boundary_service_codes, boundary_query_opts),
+    read_absmap(boundary_codes, export_dir = boundaries_folder,
+      remove_year_suffix = TRUE),
+    pattern = map(boundary_codes),
     iteration = "list"),
   tar_target(calc_field_avg,
     calc_field_avgs(stats_and_deltas, boundary_shapes),
