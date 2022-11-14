@@ -15,33 +15,17 @@ calc_field_avgs <- function(nc_path, boundaries) {
   nc_var_name <- nc_path_bits[2]
   nc_grid <- nc_path_bits[3]
 
-  # identify the unique code for each feature: likely whichever of
-  # the cols ending in 'code' that has the most unique values
-  boundaries |>
-    st_drop_geometry() |>
-    as_tibble() |>
-    dplyr::select(ends_with("code")) |>
-    summarise(across(everything(), ~ length(unique(.x)))) |>
-    pivot_longer(cols = everything()) |>
-    filter(value == max(value, na.rm = TRUE)) |>
-    pull(name) ->
-  id_code_col
-
-  # load the ncetdf with raster and ncdf4
-  nc_stack <- stack(nc_path, varname = nc_var_name)
-
   # read grid in with stars
   # (rotated grid handled with curvilinear option; regular is wgs84)
   if (str_ends(nc_grid, "i")) {
-    nc_stars <- read_ncdf(nc_grid, var = nc_var_name,
-      curvilinear = c("lon", "lat"))
+    nc_stars <- read_ncdf(nc_path, var = nc_var_name)
   } else {
-    nc_stars <- read_ncdf(nc_grid, var = nc_var_name)
+    nc_stars <- read_ncdf(nc_path, var = nc_var_name,
+      curvilinear = c("lon", "lat"))
   }
 
-  bounds <- boundaries[[1]]
   sf_use_s2(FALSE)
-  bounds_valid <- st_make_valid(bounds)
+  bounds_valid <- st_make_valid(boundaries)
   sf_use_s2(TRUE)
 
   # convert stars to sf before aggregating over areas

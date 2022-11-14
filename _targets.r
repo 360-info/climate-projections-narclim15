@@ -11,7 +11,8 @@ source("R/06-fieldavgs.r")
 
 tar_option_set(packages = c(
   "dplyr", "exactextractr", "httr2", "jsonlite", "lubridate", "ncdf4", "purrr",
-    "raster", "sf", "strayr", "stringr", "tibble", "tidyr", "ClimateOperators"))
+    "raster", "sf", "stars", "strayr", "stringr", "tibble", "tidyr",
+    "ClimateOperators"))
 
 # pipeline inputs: configure these! -------------------------------------------
 
@@ -85,7 +86,7 @@ model_ensemble_stats <- c("mean", "max", "min")
 
 # abs boundaries to download and calculate field (area) averages on
 # https://github.com/wfmackey/absmapsdata
-boundaries <- c("suburb2021", "postcode2021")
+boundaries <- c("suburb2021", "postcode2021", "sa42021")
 
 # pipeline: use targets::tar_make() to run it ------------------------------
 
