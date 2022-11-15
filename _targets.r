@@ -40,7 +40,7 @@ if ("nci" %in% data_sources) {
   nci_folders <-
     expand.grid(
       root = "/g/data/at43/output",
-      grid = "AUS-44",
+      grid = c("AUS-44", "NARCliM"),
       unsw = "UNSW",
       gcm = c("CCCma-CanESM2", "CSIRO-BOM-ACCESS1-0", "CSIRO-BOM-ACCESS1-3"),
       scenario = c("historical", "rcp45", "rcp85"),
