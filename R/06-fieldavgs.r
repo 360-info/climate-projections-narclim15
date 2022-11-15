@@ -11,7 +11,7 @@ calc_field_avgs <- function(nc_path, boundaries) {
     str_split("[_.]") |>
     unlist() ->
   nc_path_bits
-    
+
   nc_var_name <- nc_path_bits[2]
   nc_grid <- nc_path_bits[3]
 
@@ -37,7 +37,7 @@ calc_field_avgs <- function(nc_path, boundaries) {
       as_points = FALSE) |>
     st_join(bounds_valid, join = st_equals) ->
   nc_joined
-    
+
   # tidy up, drop geometry and return
   # (note that the units in these grids are no longer kelvin - they're
   # either °C or dimensionless, for days >= X°C - but we didn't change
