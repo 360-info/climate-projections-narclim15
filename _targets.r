@@ -67,11 +67,7 @@ if ("manual" %in% data_sources) {
 # set thresholds to count days >= X. you can set them separately for each
 # variable (eg. uncomment the tasmin-bc to set minimum temp thresholds if
 # you're downloading that data)
-selected_thresholds <-
-  rbind(
-    # expand.grid(var = "tasmin-bc", threshold = c(0, 10)),
-    expand.grid(var = "tasmax-bc", threshold = c(35, 37.5))
-  )
+selected_thresholds <- c(35, 37.5)
 
 # note: cut.Date() by default does intervals of [left, right)
 # (use "-" to drop periods)
@@ -103,8 +99,7 @@ list(
   tar_target(nci_paths, nci_folders),
   tar_target(nci_host_string, nci_host),
   tar_target(manual_paths, manual_folders),
-  tar_target(climate_vars, selected_thresholds$var),
-  tar_target(thresholds, selected_thresholds$threshold),
+  tar_target(thresholds, selected_thresholds),
   tar_target(year_cuts, year_breaks),
   tar_target(period_stats, yearblock_stats),
   tar_target(ensemble_stats, model_ensemble_stats),
@@ -134,8 +129,8 @@ list(
 
   # 2) calculate days >= 35 or 37.5 C (group each year)
   tar_target(count_days,
-    count_annual_days_gte(source_data_all, climate_vars, thresholds),
-    pattern = cross(source_data_all, map(climate_vars, thresholds)),
+    count_annual_days_gte(source_data_all, thresholds),
+    pattern = cross(source_data_all, thresholds),
     format = "file"),
 
   # 3) count year block (period) stats (mean/min/max)

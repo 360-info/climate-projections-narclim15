@@ -19,7 +19,7 @@ count_annual_days_gte <- function(path, thresh = 35) {
   if (cdo("showname", path) |> str_detect(fixed("AWAP_qualitymask"))) {
 
     # a) extract mask to separate file (to scratch)
-    mask_path <- tempfile("mask_", here("_targets", "scratch"), ".nc")
+    mask_path <- tempfile("mask_", scratch_folder, ".nc")
     cdo(
       "-L",
       csl("setctomiss", "0"),
@@ -29,7 +29,7 @@ count_annual_days_gte <- function(path, thresh = 35) {
     
     # b) remove unmasked regions (to scratch)
     # cdo div file1.nc mask.nc out.nc
-    obs_path <- tempfile("out_", here("_targets", "scratch"), ".nc")
+    obs_path <- tempfile("out_", scratch_folder, ".nc")
     cdo(
       "-L",
       "div",
