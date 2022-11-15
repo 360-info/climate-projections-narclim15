@@ -34,7 +34,7 @@ You can further configure how the pipeline runs by altering the top half of `_ta
   - `manual` lets you manually provide files (if, for example, you've already downloaded some). In this case, `manual_folders` is a vector of paths to search. The files should still be named using the NARCliM DRS naming scheme:
     * `[var]_[grid]_[gcm]_[scenario]_[run]_[rcm]_v1_day_[startdate]-[enddate].nc`
     
-2. `selected_thresholds`: a vector of temperature exceedance thresholds (in °C). The pipeline will count the number of days annually at or above each threshold.
+2. `selected_thresholds`: a data frame of exceedance thresholds (in °C). They can be set separately for different temperature variables (`tasmax-bc` and `tasmin-bc`, for example). The pipeline will count the number of days annually at or above each threshold.
 3. `year_breaks`: a vector of dates used to split the days up. Values here are the dates themselves (given as YYYY-MM-DD strings); names are the labels to give to each period. Periods run forward from the date provided to the day before the next break: for example, if `1995` is `"1986-01-01"` and `-` is `"2006-01-01"`, files between 1986 and 2005 are given the period name `1995`. Use the name `-` to drop files in this period.
 4. `yearblock_stats`: a vector of statistics to calculate over the period (for example, `"mean"` is the number of days ≥ X°C in an average year in the block, while `"max"` is the largest number of such days).
 5. `model_ensemble_stats`: a vector of statistics to calculate across the different climate models (GCMs, RCMs and runs).
