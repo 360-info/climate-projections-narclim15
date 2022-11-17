@@ -9,18 +9,17 @@ calc_field_avgs <- function(nc_path, boundaries) {
   nc_path |>
     basename() |>
     str_split("[_.]") |>
-    unlist() ->
+    unlist() |>
+    set_names(c("measure", "var", "grid", "scenario", "v1", "day",
+      "periodstat", "period", "ensvar", "ext")) ->
   nc_path_bits
-
-  nc_var_name <- nc_path_bits[2]
-  nc_grid <- nc_path_bits[3]
 
   # read grid in with stars
   # (rotated grid handled with curvilinear option; regular is wgs84)
-  if (str_ends(nc_grid, "i")) {
-    nc_stars <- read_ncdf(nc_path, var = nc_var_name)
+  if (str_ends(nc_path_bits["grid"], "i")) {
+    nc_stars <- read_ncdf(nc_path, var = nc_path_bits["var"])
   } else {
-    nc_stars <- read_ncdf(nc_path, var = nc_var_name,
+    nc_stars <- read_ncdf(nc_path, var = nc_path_bits["var"],
       curvilinear = c("lon", "lat"))
   }
 
@@ -45,5 +44,14 @@ calc_field_avgs <- function(nc_path, boundaries) {
   nc_joined |>
     set_names(c("value", tail(names(nc_joined), -1))) |>
     mutate(value = as.numeric(value)) |>
-    st_drop_geometry()
+    st_drop_geometry() |>
+    as_tibble() |>
+    mutate(
+      file_measure = nc_path_bits["measure"],
+      file_var = nc_path_bits["var"],
+      file_grid = nc_path_bits["grid"],
+      file_scenario = nc_path_bits["scenario"],
+      file_period = nc_path_bits["period"],
+      file_ensvar = nc_path_bits["ensvar"]) |>
+    dplyr::select(starts_with("file"), everything())
 }
