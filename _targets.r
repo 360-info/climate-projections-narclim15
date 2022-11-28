@@ -41,7 +41,10 @@ if ("nci" %in% data_sources) {
       root = "/g/data/at43/output",
       grid = c("AUS-44", "NARCliM"),
       unsw = "UNSW",
-      gcm = c("CCCma-CanESM2", "CSIRO-BOM-ACCESS1-0", "CSIRO-BOM-ACCESS1-3"),
+      gcm = c(
+        # "CCCma-CanESM2",        # skipping until we fix fillvalue issues
+        "CSIRO-BOM-ACCESS1-0",
+        "CSIRO-BOM-ACCESS1-3"),
       scenario = c("historical", "rcp45", "rcp85"),
       run = "r1i1p1",
       rcm = c("UNSW-WRF360J", "UNSW-WRF360K"),
@@ -67,7 +70,7 @@ if ("manual" %in% data_sources) {
 # set thresholds to count days >= X. you can set them separately for each
 # variable (eg. uncomment the tasmin-bc to set minimum temp thresholds if
 # you're downloading that data)
-selected_thresholds <- c(35, 37.5)
+selected_thresholds <- c(35, 37.5, 40)
 
 # note: cut.Date() by default does intervals of [left, right)
 # (use "-" to drop periods)
@@ -87,7 +90,7 @@ model_ensemble_stats <- c("mean", "max", "min")
 
 # abs boundaries to download and calculate field (area) averages on
 # https://github.com/wfmackey/absmapsdata
-boundaries <- c("suburb2021", "postcode2021", "sa42021")
+boundaries <- c("postcode2021", "sa42021")
 
 # pipeline: use targets::tar_make() to run it ------------------------------
 
