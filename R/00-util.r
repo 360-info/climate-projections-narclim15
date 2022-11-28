@@ -4,7 +4,7 @@
 create_storedir_if_missing <- function(folder_name) {
   created_folder <- file.path(targets::tar_config_get("store"), folder_name)
   if (!dir.exists(created_folder)) {
-    dir.create(created_folder)
+    dir.create(created_folder, recursive = TRUE)
   }
   return(created_folder)
 }
