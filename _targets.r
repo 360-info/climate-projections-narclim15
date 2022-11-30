@@ -42,7 +42,7 @@ if ("nci" %in% data_sources) {
       grid = c("AUS-44", "NARCliM"),
       unsw = "UNSW",
       gcm = c(
-        # "CCCma-CanESM2",        # skipping until we fix fillvalue issues
+        "CCCma-CanESM2",
         "CSIRO-BOM-ACCESS1-0",
         "CSIRO-BOM-ACCESS1-3"),
       scenario = c("historical", "rcp45", "rcp85"),
