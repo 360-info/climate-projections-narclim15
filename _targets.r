@@ -10,7 +10,7 @@ source("R/05-histdiff.r")
 source("R/06-fieldavgs.r")
 
 tar_option_set(packages = c(
-  "dplyr", "httr2", "jsonlite", "lubridate", "ncdf4", "purrr", "sf", "stars",
+  "arrow", "dplyr", "httr2", "jsonlite", "lubridate", "ncdf4", "purrr", "sf", "stars",
   "strayr", "stringr", "tibble", "tidyr", "ClimateOperators"))
 
 # pipeline inputs: configure these! -------------------------------------------
@@ -180,5 +180,11 @@ list(
     pattern = cross(stats_and_deltas, boundary_shapes))
 
   # 7) cleanup and consolidation?
+  tar_target(export_projections,
+    export_all_projections(calc_field_avg),
+    format = "file")
+
+  )
+  
 
 )
