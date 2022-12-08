@@ -90,7 +90,7 @@ model_ensemble_stats <- c("mean", "max", "min")
 
 # abs boundaries to download and calculate field (area) averages on
 # https://github.com/wfmackey/absmapsdata
-boundaries <- c("postcode2021", "sa42021")
+boundaries <- c("postcode2021", "sa42021", "gcc2021")
 
 # pipeline: use targets::tar_make() to run it ------------------------------
 
@@ -167,24 +167,27 @@ list(
     pattern = map(ensemble_metadata),
     format = "file"),
 
-  # 6) calculate area averages (for postcodes, sa4s, etc.)
-  # (do this for both regular ensemble stats and rcp deltas!)
+  # 6a) get boundaries for calculating area averages
   tar_target(stats_and_deltas, c(calc_ensemble_stat, calc_rcp_delta)),
   tar_target(boundary_shapes,
     read_absmap(boundary_codes, export_dir = boundaries_folder,
       remove_year_suffix = TRUE),
     pattern = map(boundary_codes),
     iteration = "list"),
+  tar_target(east_west_sydney, get_east_west_sydney()),
+
+  # 6b) calculate area averages (for postcodes, sa4s, etc.)
+  # (do this for both regular ensemble stats and rcp deltas!)
   tar_target(calc_field_avg,
     calc_field_avgs(stats_and_deltas, boundary_shapes),
-    pattern = cross(stats_and_deltas, boundary_shapes))
+    pattern = cross(stats_and_deltas, boundary_shapes)),
+  tar_target(calc_eastwest_sydney_field_avg,
+    calc_field_avgs(stats_and_deltas, east_west_sydney),
+    pattern = cross(stats_and_deltas, east_west_sydney))
 
   # 7) cleanup and consolidation?
-  tar_target(export_projections,
-    export_all_projections(calc_field_avg),
-    format = "file")
-
-  )
+  # tar_target(export_projections,
+  #   export_all_projections(calc_field_avg),
+  #   format = "file")
   
-
 )
