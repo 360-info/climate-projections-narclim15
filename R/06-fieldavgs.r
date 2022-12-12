@@ -60,15 +60,15 @@ calc_field_avgs <- function(nc_path, boundaries) {
 # get_east_west_sydney: downloads the SA4 shapefile and aggregates greater
 # sydney sa4s into east and west
 get_east_west_sydney <- function() {
-  read_absmap("sa42021", export_dir = scratch_folder,
+  read_absmap("sa32021", export_dir = scratch_folder,
     remove_year_suffix = TRUE) |>
-    filter(gcc_code == "1GSYD") |>
     mutate(
       eastwest_group = case_when(
-        sa4_code %in% c("118", "117", "122", "121", "126", "128") ~
-          "Eastern Sydney",
-        # west: NOT penrith or baulkham hills/hawkesbury
-        sa4_code %in% c("119", "120", "125", "116", "127") ~
+        sa3_code %in% as.character(c(11701:11703, 11801:11802, 11901:11904,
+          12001:12003, 12101:12104, 12201:12203, 12601:12602, 12801:12802)) ~
+          "Sydney",
+        sa3_code %in% as.character(c(11601:11603, 12301:12303, 12403:12405,
+          12501:12504, 12701:12703)) ~
           "Western Sydney",
         TRUE ~ "neither")) |>
     filter(eastwest_group != "neither") |>
